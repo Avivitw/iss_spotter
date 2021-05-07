@@ -30,16 +30,34 @@ const fetchCoordsByIP = function(ip,callback) {
       return;
     }
 
-    const Latitude = JSON.parse(body).latitude;
-    const Longitude = JSON.parse(body).longitude;
-    const data = {Latitude, Longitude};
+    const lat = JSON.parse(body).latitude;
+    const lon = JSON.parse(body).longitude;
+    const data = {lat, lon};
     return callback(null,data);
   });
 };
 
 
 
+const fetchISSFlyOverTimes = function(coords, callback) {
+  request(`http://api.open-notify.org/iss/v1/?lat=${coords.lat}&lon=${coords.lon}`, (error, response, body) => {
+    if (error) {
+      return callback(error, null);
+    }
+    if (response.statusCode !== 200) {
+      const msg = `Status Code ${response.statusCode} when fetching ISSFlyOverTimes. Response: ${body}`;
+      callback(Error(msg), null);
+      return;
+    }
+
+    const data = JSON.parse(body);
+    const flyOverTime = data.response;
+    return callback(null,flyOverTime);
+  });
+};
+
 
 module.exports = { fetchMyIP,
-  fetchCoordsByIP
+  fetchCoordsByIP,
+  fetchISSFlyOverTimes
 };
